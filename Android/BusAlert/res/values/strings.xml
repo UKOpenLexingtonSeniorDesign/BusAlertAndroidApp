@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BusAlert</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+	<string name="main_title">Android Bus Alert</string>
+	<string name="map_label">Map</string>
+	<string name="alert_label">Set Alert</string>
+	<string name="about_label">About</string>
+	<string name="exit_label">Exit</string>
+	<string name="about_title">About Android Sudoku</string>
+	<string name="about_text">\
+	Bus Alert allows the user to subscribe to a specific stop,
+	at a specific time of the day, for a specific bus,
+	and get notifications that tell when the estimated
+	arrival time of the bus is.
+</string>
+</resources>
