@@ -5,7 +5,7 @@
 	android:layout_height="fill_parent"
 	android:layout_width="fill_parent"
 	android:padding="30dip"
-	android:orientation="horizontal">
+	android:orientation="vertical">
 	<LinearLayout
 		android:orientation="vertical"
 		android:layout_height="wrap_content"
@@ -19,7 +19,7 @@
 			android:layout_gravity="center"
 			android:layout_marginBottom="25dip"
 			android:textSize="32sp"
-			android:textColor="#444444"
+			android:textColor="#aaaaaa"
 			android:textStyle="bold" />
 		<Button
 			android:id="@+id/map_button"

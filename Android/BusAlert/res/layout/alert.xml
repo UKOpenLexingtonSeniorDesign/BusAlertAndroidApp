@@ -4,7 +4,7 @@
 	android:layout_height="fill_parent"
 	android:layout_width="fill_parent"
 	android:padding="30dip"
-	android:orientation="horizontal">
+	android:orientation="vertical">
 	
     	<TextView
 			android:text="@string/alert_label"
@@ -13,7 +13,77 @@
 			android:layout_gravity="center"
 			android:layout_marginBottom="25dip"
 			android:textSize="32sp"
-			android:textColor="#444444"
+			android:textColor="#777777"
 			android:textStyle="bold" />
+			
+    	<LinearLayout
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:padding="22dip"
+			android:orientation="horizontal">
+			
+    		<TextView
+				android:text="@string/bus_stop_label"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_gravity="left"
+				android:textSize="18sp"
+				android:layout_marginRight="5dip"
+				android:textColor="#ffffff"
+				android:textStyle="bold" />
+    	    
+    		<Spinner
+		        android:id="@+id/stop_spinner"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" />
+    	
+    	</LinearLayout>
+	    	
+    	
+    	<LinearLayout
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:padding="22dip"
+			android:orientation="horizontal">
+    		
+	    	<TextView
+				android:text="@string/bus_label"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_gravity="left"
+				android:layout_marginRight="5dip"
+				android:textSize="18sp"
+				android:textColor="#ffffff"
+				android:textStyle="bold" />
+    	    
+	    	<Spinner
+		        android:id="@+id/bus_spinner"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" />
+	    	
+	    </LinearLayout>
+	    
+    	<LinearLayout
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:padding="22dip"
+			android:orientation="horizontal">
+	    	
+	    	<TextView
+				android:text="@string/time_to_leave_label"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_gravity="left"
+				android:layout_marginRight="5dip"
+				android:textSize="18sp"
+				android:textColor="#ffffff"
+				android:textStyle="bold" />
+    	    
+	    	<Spinner
+		        android:id="@+id/time_spinner"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" />
+	    	
+	    </LinearLayout>
 	
 </LinearLayout>
