@@ -29,11 +29,21 @@ public class MainActivity extends Activity implements OnClickListener{
     }
     public void onClick(View v){
     	switch (v.getId()){
+        case R.id.map_button:
+    		Intent map = new Intent(this, Map.class);
+    		startActivity(map);
+            break;
+        case R.id.alert_button:
+    		Intent alert = new Intent(this, Alert.class);
+    		startActivity(alert);
+            break;
     	case R.id.about_button:
-    		Intent i = new Intent(this, About.class);
-    		startActivity(i);
+    		Intent about = new Intent(this, About.class);
+    		startActivity(about);
     		break;
-    	//more buttons go here
+        case R.id.exit_button:
+            finish();
+            break;
     	}
     }
 
