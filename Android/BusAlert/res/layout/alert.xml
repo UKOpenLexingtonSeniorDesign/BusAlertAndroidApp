@@ -16,6 +16,29 @@
 			android:textColor="#777777"
 			android:textStyle="bold" />
 			
+		  <LinearLayout
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:padding="22dip"
+			android:orientation="horizontal">
+			
+    		<TextView
+				android:text="@string/route_label"
+				android:layout_height="wrap_content"
+				android:layout_width="wrap_content"
+				android:layout_gravity="left"
+				android:textSize="18sp"
+				android:layout_marginRight="5dip"
+				android:textColor="#ffffff"
+				android:textStyle="bold" />
+    	    
+    		<Spinner
+		        android:id="@+id/route_spinner"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" />
+    	
+    	</LinearLayout>	
+			
     	<LinearLayout
 			android:layout_height="wrap_content"
 			android:layout_width="fill_parent"

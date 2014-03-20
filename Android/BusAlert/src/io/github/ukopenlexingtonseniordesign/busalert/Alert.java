@@ -52,6 +52,16 @@ public class Alert extends Activity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.alert);
 		
+	    //FIX!!!: Using a temporary fix to fill the route spinner (hard coded xml). Will not be able to track a new route that Lextran adds.
+		Spinner spinner = (Spinner) findViewById(R.id.route_spinner);
+		// Create an ArrayAdapter using the string array and a default spinner layout
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+		        R.array.route_array, R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		spinner.setAdapter(adapter);
+		
 		XMLTask task = new XMLTask();
 	    task.execute(new Integer[] { 10 });		//Get stops for route 10
 	    
