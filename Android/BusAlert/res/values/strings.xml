@@ -9,7 +9,7 @@
 	<string name="alert_label">Set Alert</string>
 	<string name="about_label">About</string>
 	<string name="exit_label">Exit</string>
-	<string name="about_title">About Android Sudoku</string>
+	<string name="about_title">About Bus Alert</string>
 	<string name="bus_stop_label">Bus Stop:</string>
 	<string name="time_to_leave_label">Time To Leave:</string>
 	<string name="bus_label">Bus:</string>
