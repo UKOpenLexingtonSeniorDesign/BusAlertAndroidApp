@@ -27,6 +27,10 @@ import android.R.string;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +42,7 @@ import android.os.Bundle;
 //Should we be using the KML from the "segments" element information?  
 public class Alert extends Activity{
 	private String XMLToParse;
+	private String routeSelected;
 	static final String KEY_ROUTE = "route";
 	static final String KEY_STOPS = "stops";
 	static final String KEY_STOP = "stop";
@@ -61,10 +66,9 @@ public class Alert extends Activity{
 		adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
 		// Apply the adapter to the spinner
 		spinner.setAdapter(adapter);
-		
-		XMLTask task = new XMLTask();
-	    task.execute(new Integer[] { 10 });		//Get stops for route 10
+		spinner.setOnItemSelectedListener(new MyItemSelectedListener());
 	    
+	    /*
 	    //not sure if putting the xml information in an arraylist of hashmaps is the best way to do this
 	    ArrayList<HashMap<String, String>> stops = new ArrayList<HashMap<String, String>>();
     	Document doc = getDomElement(XMLToParse);
@@ -84,6 +88,22 @@ public class Alert extends Activity{
             // adding HashList to ArrayList
             stops.add(map);
         }
+        */
+	}
+	
+	public class MyItemSelectedListener implements OnItemSelectedListener {
+	    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+	        routeSelected = parent.getItemAtPosition(pos).toString();
+	        
+	        //Now call the XML getter
+			XMLTask task = new XMLTask();
+			int routeInt = Integer.parseInt(routeSelected);		//Cast to int
+		    task.execute(new Integer[] { routeInt });		//Get stops for selected route
+	    }
+
+	    public void onNothingSelected(AdapterView<?> parent) {
+	        // Do nothing.
+	    }
 	}
 	
 	private class XMLTask extends AsyncTask<Integer, String, String> {
@@ -129,6 +149,7 @@ public class Alert extends Activity{
 		}
 	}
 	
+	/*
 	public Document getDomElement(String xml){
 		Document doc = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -153,6 +174,7 @@ public class Alert extends Activity{
                 // return DOM
             return doc;
 	}
+	*/
 	
 }
 
