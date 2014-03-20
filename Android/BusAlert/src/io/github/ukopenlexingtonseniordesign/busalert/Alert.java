@@ -37,12 +37,19 @@ import android.widget.Toast;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+/*				***READ THIS***
+ * The order of calls is important to make sure we don't get a null pointer exception. We start with the OnSelectListener of the spinner,
+ * once that completes we execute the AsyncTask from the listener callback function to retrieve the XML info, on the postExecute
+ * function of the AsyncTask we call the method in Alert that sets the ArrayList of maps that is parsed. Now we have the info we need
+ * in the main function. 
+ */
+
 //how do we overlay the parsed data onto the map? 
 //Am I even parsing the right info here? 
 //Should we be using the KML from the "segments" element information?  
 public class Alert extends Activity{
-	private String XMLToParse;
 	private String routeSelected;
+	ArrayList<HashMap<String, String>> stops;
 	static final String KEY_ROUTE = "route";
 	static final String KEY_STOPS = "stops";
 	static final String KEY_STOP = "stop";
@@ -67,31 +74,16 @@ public class Alert extends Activity{
 		// Apply the adapter to the spinner
 		spinner.setAdapter(adapter);
 		spinner.setOnItemSelectedListener(new MyItemSelectedListener());
-	    
-	    /*
-	    //not sure if putting the xml information in an arraylist of hashmaps is the best way to do this
-	    ArrayList<HashMap<String, String>> stops = new ArrayList<HashMap<String, String>>();
-    	Document doc = getDomElement(XMLToParse);
-    	//get each stop
-    	NodeList nl = doc.getElementsByTagName(KEY_STOPS);    	
-    	for (int i = 0; i < nl.getLength(); i++) {
-            // creating new HashMap
-            HashMap<String, String> map = new HashMap<String, String>();
-            Element e = (Element) nl.item(i);
-            
-            //CHANGES NEEDED HERE?
-            map.put(KEY_LNG, e.getAttribute(KEY_LNG));
-            map.put(KEY_LABEL, e.getAttribute(KEY_LABEL));
-            map.put(KEY_LAT, e.getAttribute(KEY_LAT));
-            map.put(KEY_HTML, e.getAttribute(KEY_HTML));
-            
-            // adding HashList to ArrayList
-            stops.add(map);
-        }
-        */
 	}
 	
+    public void setStops(ArrayList<HashMap<String, String>> inStops) {
+    	stops = inStops;
+    	int foo = 5;
+    }
+	
 	public class MyItemSelectedListener implements OnItemSelectedListener {
+		
+		//Callback function
 	    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 	        routeSelected = parent.getItemAtPosition(pos).toString();
 	        
@@ -120,7 +112,29 @@ public class Alert extends Activity{
 	    protected void onPostExecute(String xml) {
 	        // If you have created a Dialog, here is the place to dismiss it.
 	        // The `xml` that you returned will be passed to this method
-	    	XMLToParse = xml;
+	    	
+		    //not sure if putting the xml information in an arraylist of hashmaps is the best way to do this
+		    ArrayList<HashMap<String, String>> stops = new ArrayList<HashMap<String, String>>();
+	    	Document doc = getDomElement(xml);
+	    	//get each stop
+	    	NodeList nl = doc.getElementsByTagName(KEY_STOPS);    	
+	    	for (int i = 0; i < nl.getLength(); i++) {
+	            // creating new HashMap
+	            HashMap<String, String> map = new HashMap<String, String>();
+	            Element e = (Element) nl.item(i);
+	            
+	            //CHANGES NEEDED HERE?
+	            map.put(KEY_LNG, e.getAttribute(KEY_LNG));
+	            map.put(KEY_LABEL, e.getAttribute(KEY_LABEL));
+	            map.put(KEY_LAT, e.getAttribute(KEY_LAT));
+	            map.put(KEY_HTML, e.getAttribute(KEY_HTML));
+	            
+	            // adding HashList to ArrayList
+	            stops.add(map);
+	        }
+	    	
+	    	int foo = 5;
+	    	setStops(stops);
 	    }
 
 		@Override
@@ -149,7 +163,6 @@ public class Alert extends Activity{
 		}
 	}
 	
-	/*
 	public Document getDomElement(String xml){
 		Document doc = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -174,8 +187,6 @@ public class Alert extends Activity{
                 // return DOM
             return doc;
 	}
-	*/
-	
 }
 
 
