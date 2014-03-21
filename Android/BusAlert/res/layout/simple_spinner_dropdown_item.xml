@@ -6,4 +6,4 @@
 	android:background="#777777"
 	android:ellipsize="marquee"
 	android:singleLine="true"
-	android:textColor="#ffffff" />
+	android:textColor="#aaaaaa" />
