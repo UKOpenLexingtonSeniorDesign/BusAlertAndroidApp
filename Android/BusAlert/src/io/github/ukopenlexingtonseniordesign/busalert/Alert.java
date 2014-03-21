@@ -44,9 +44,9 @@ import android.os.Bundle;
  * in the main function. 
  */
 
-//how do we overlay the parsed data onto the map? 
-//Am I even parsing the right info here? 
-//Should we be using the KML from the "segments" element information?  
+
+
+  
 public class Alert extends Activity{
 	private String routeSelected;
 	ArrayList<HashMap<String, String>> stops;
@@ -74,8 +74,10 @@ public class Alert extends Activity{
 		// Apply the adapter to the spinner
 		spinner.setAdapter(adapter);
 		spinner.setOnItemSelectedListener(new MyItemSelectedListener());
+		
 	}
 	
+	//confused on what this function does. Seems like it's taking "stops" and setting it to itself
     public void setStops(ArrayList<HashMap<String, String>> inStops) {
     	stops = inStops;
     	int foo = 5;
@@ -113,11 +115,10 @@ public class Alert extends Activity{
 	        // If you have created a Dialog, here is the place to dismiss it.
 	        // The `xml` that you returned will be passed to this method
 	    	
-		    //not sure if putting the xml information in an arraylist of hashmaps is the best way to do this
-		    ArrayList<HashMap<String, String>> stops = new ArrayList<HashMap<String, String>>();
+		    stops = new ArrayList<HashMap<String, String>>();
 	    	Document doc = getDomElement(xml);
 	    	//get each stop
-	    	NodeList nl = doc.getElementsByTagName(KEY_STOPS);    	
+	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);    	
 	    	for (int i = 0; i < nl.getLength(); i++) {
 	            // creating new HashMap
 	            HashMap<String, String> map = new HashMap<String, String>();
@@ -134,7 +135,7 @@ public class Alert extends Activity{
 	        }
 	    	
 	    	int foo = 5;
-	    	setStops(stops);
+	    	//setStops(stops);
 	    }
 
 		@Override
