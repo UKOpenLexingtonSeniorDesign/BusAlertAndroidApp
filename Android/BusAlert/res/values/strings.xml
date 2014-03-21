@@ -11,7 +11,8 @@
 	<string name="exit_label">Exit</string>
 	<string name="about_title">About Bus Alert</string>
 	<string name="bus_stop_label">Bus Stop:</string>
-	<string name="time_to_leave_label">Time To Leave:</string>
+	<string name="time_to_alert_1_label">Time To Alert 1:</string>
+	<string name="time_to_alert_2_label">Time To Alert 2:</string>
 	<string name="bus_label">Bus:</string>
 	<string name="route_label">Route:</string>
 	<string name="placeholder">Placeholder</string>
@@ -22,6 +23,33 @@
 	arrival time of the bus is.
 	</string>
     <string-array name="route_array">
+        <item>Woodhill</item>
+        <item>Georgetown Road</item>
+        <item>Tates Creek Road</item>
+        <item>Newtown Pike</item>
+        <item>Nicholasville Road</item>
+        <item>North Broadway</item>
+        <item>North Limestone</item>
+        <item>Versailles Road</item>
+		<item>Eastland</item>
+		<item>Hamburg Pavilion</item>
+		<item>Richmond Road</item>
+		<item>Leestown Road</item>
+		<item>South Broadway</item>
+		<item>UK Commonwealth Stadium</item>
+		<item>Red Mile</item>
+		<item>BCTC Southland</item>
+		<item>Northside Connector</item>
+		<item>Centre Parkway Connector</item>
+		<item>Masterson Station</item>
+		<item>Keeneland Airport</item>
+		<item>Nicholasville Express</item>
+		<item>Trolley Blue Route</item>
+		<item>Trolley Green Route</item>
+		<item>Alexandria - UK Medical Center</item>
+    </string-array>
+    <string-array name="hour_list">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
         <item>3</item>
@@ -30,23 +58,35 @@
         <item>6</item>
         <item>7</item>
         <item>8</item>
-		<item>9</item>
-		<item>10</item>
-		<item>11</item>
-		<item>12</item>
-		<item>13</item>
-		<item>14</item>
-		<item>15</item>
-		<item>16</item>
-		<item>17</item>
-		<item>19</item>
-		<item>20</item>
-		<item>21</item>
-		<item>22</item>
-		<item>23</item>
-		<item>24</item>
-		<item>25</item>
-		<item>31</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+    </string-array>
+    <string-array name="minute_list">
+        <item>:00</item>
+        <item>:05</item>
+        <item>:10</item>
+        <item>:15</item>
+        <item>:20</item>
+        <item>:25</item>
+        <item>:30</item>
+        <item>:35</item>
+        <item>:40</item>
+        <item>:45</item>
+        <item>:50</item>
+        <item>:55</item>
     </string-array>
 	
 </resources>

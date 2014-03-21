@@ -19,7 +19,7 @@
 		  <LinearLayout
 			android:layout_height="wrap_content"
 			android:layout_width="fill_parent"
-			android:padding="22dip"
+			android:padding="15dip"
 			android:orientation="horizontal">
 			
     		<TextView
@@ -42,7 +42,7 @@
     	<LinearLayout
 			android:layout_height="wrap_content"
 			android:layout_width="fill_parent"
-			android:padding="22dip"
+			android:padding="15dip"
 			android:orientation="horizontal">
 			
     		<TextView
@@ -61,16 +61,15 @@
 		        android:layout_height="wrap_content" />
     	
     	</LinearLayout>
-	    	
-    	
+	    
     	<LinearLayout
 			android:layout_height="wrap_content"
 			android:layout_width="fill_parent"
-			android:padding="22dip"
+			android:padding="0dip"
 			android:orientation="horizontal">
-    		
+	    	
 	    	<TextView
-				android:text="@string/bus_label"
+				android:text="@string/time_to_alert_1_label"
 				android:layout_height="wrap_content"
 				android:layout_width="wrap_content"
 				android:layout_gravity="left"
@@ -80,7 +79,12 @@
 				android:textStyle="bold" />
     	    
 	    	<Spinner
-		        android:id="@+id/bus_spinner"
+		        android:id="@+id/hour1_spinner"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" />
+	    	
+	    	<Spinner
+		        android:id="@+id/minute1_spinner"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content" />
 	    	
@@ -89,11 +93,11 @@
     	<LinearLayout
 			android:layout_height="wrap_content"
 			android:layout_width="fill_parent"
-			android:padding="22dip"
+			android:padding="0dip"
 			android:orientation="horizontal">
 	    	
 	    	<TextView
-				android:text="@string/time_to_leave_label"
+				android:text="@string/time_to_alert_2_label"
 				android:layout_height="wrap_content"
 				android:layout_width="wrap_content"
 				android:layout_gravity="left"
@@ -103,10 +107,16 @@
 				android:textStyle="bold" />
     	    
 	    	<Spinner
-		        android:id="@+id/time_spinner"
+		        android:id="@+id/hour2_spinner"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content" />
+	    	
+	    	<Spinner
+		        android:id="@+id/minute2_spinner"
 		        android:layout_width="wrap_content"
 		        android:layout_height="wrap_content" />
 	    	
 	    </LinearLayout>
+    	
 	
 </LinearLayout>

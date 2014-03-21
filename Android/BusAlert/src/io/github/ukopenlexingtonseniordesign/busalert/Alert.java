@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -49,6 +50,10 @@ import android.os.Bundle;
   
 public class Alert extends Activity{
 	private String routeSelected;
+	private String hour1Selected;
+	private String minute1Selected;
+	private String hour2Selected;
+	private String minute2Selected;
 	ArrayList<HashMap<String, String>> stops;
 	static final String KEY_ROUTE = "route";
 	static final String KEY_STOPS = "stops";
@@ -58,29 +63,134 @@ public class Alert extends Activity{
 	static final String KEY_LABEL = "label";
 	static final String KEY_LAT = "lat";
 	static final String KEY_HTML = "html";
+	HashMap<String, Integer> routeID = new HashMap<String, Integer>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
+		//Fill the route id hashmap
+		routeID.put("Woodhill", 1);
+		routeID.put("Georgetown Road", 2);
+		routeID.put("Tates Creek Road", 3);
+		routeID.put("Newtown Pike", 4);
+		routeID.put("Nicholasville Road", 5);
+		routeID.put("North Broadway", 6);
+		routeID.put("North Limestone", 7);
+		routeID.put("Versailles Road", 8);
+		routeID.put("Eastland", 9);
+		routeID.put("Hamburg Pavillion", 10);
+		routeID.put("Richmond Road", 11);
+		routeID.put("Leestown Road", 12);
+		routeID.put("South Broadway", 13);
+		routeID.put("UK Commonwealth Stadium", 14);
+		routeID.put("Red Mile", 15);
+		routeID.put("BCTC Southland", 16);
+		routeID.put("Northside Connector", 17);
+		routeID.put("Centre Parkway Connector", 18);
+		routeID.put("Masterson Station", 20);
+		routeID.put("Keeneland Airport", 21);
+		routeID.put("Nicholasville Express", 22);
+		routeID.put("Trolley Blue Route", 24);
+		routeID.put("Trolley Green Route", 25);
+		routeID.put("Alexandria - UK Medical Center", 31);
+		
+		//Create a List<String> to use to fill the route spinner
+		List<String> route_list = new ArrayList<String>();
+		for (String s : routeID.keySet()) {
+			route_list.add(s);
+		}
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.alert);
 		
-	    //FIX!!!: Using a temporary fix to fill the route spinner (hard coded xml). Will not be able to track a new route that Lextran adds.
-		Spinner spinner = (Spinner) findViewById(R.id.route_spinner);
+		//Fill the first hour spinner
+		Spinner hour1_spinner = (Spinner) findViewById(R.id.hour1_spinner);
 		// Create an ArrayAdapter using the string array and a default spinner layout
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-		        R.array.route_array, R.layout.simple_spinner_item);
+		ArrayAdapter<CharSequence> hour1_adapter = ArrayAdapter.createFromResource(this,
+					R.array.hour_list, R.layout.simple_spinner_item);
 		// Specify the layout to use when the list of choices appears
-		adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+		hour1_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
 		// Apply the adapter to the spinner
-		spinner.setAdapter(adapter);
-		spinner.setOnItemSelectedListener(new MyItemSelectedListener());
+		hour1_spinner.setAdapter(hour1_adapter);
+		hour1_spinner.setOnItemSelectedListener(new Hour1SelectedListener());
+				
+		//Fill the first minute spinner
+		Spinner minute1_spinner = (Spinner) findViewById(R.id.minute1_spinner);
+		// Create an ArrayAdapter using the string array and a default spinner layout
+		ArrayAdapter<CharSequence> minute1_adapter = ArrayAdapter.createFromResource(this,
+			        R.array.minute_list, R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		minute1_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		minute1_spinner.setAdapter(minute1_adapter);
+		minute1_spinner.setOnItemSelectedListener(new Minute1SelectedListener());
 		
+		//Fill the first hour spinner
+		Spinner hour2_spinner = (Spinner) findViewById(R.id.hour2_spinner);
+		// Create an ArrayAdapter using the string array and a default spinner layout
+		ArrayAdapter<CharSequence> hour2_adapter = ArrayAdapter.createFromResource(this,
+					R.array.hour_list, R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		hour2_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		hour2_spinner.setAdapter(hour1_adapter);
+		hour2_spinner.setOnItemSelectedListener(new Hour2SelectedListener());
+				
+		//Fill the first minute spinner
+		Spinner minute2_spinner = (Spinner) findViewById(R.id.minute2_spinner);
+		// Create an ArrayAdapter using the string array and a default spinner layout
+		ArrayAdapter<CharSequence> minute2_adapter = ArrayAdapter.createFromResource(this,
+			        R.array.minute_list, R.layout.simple_spinner_item);
+		// Specify the layout to use when the list of choices appears
+		minute2_adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+		// Apply the adapter to the spinner
+		minute2_spinner.setAdapter(minute1_adapter);
+		minute2_spinner.setOnItemSelectedListener(new Minute2SelectedListener());
+		
+	    //FIX!!!: Using a temporary fix to fill the route spinner (hard coded xml). Will not be able to track a new route that Lextran adds.
+		// Create an ArrayAdapter using the string array and a default spinner layout
+        Spinner route_spinner = (Spinner) findViewById(R.id.route_spinner);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.simple_spinner_item, route_list);
+        dataAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        route_spinner.setAdapter(dataAdapter);
+		route_spinner.setOnItemSelectedListener(new MyItemSelectedListener());
 	}
 	
 	//confused on what this function does. Seems like it's taking "stops" and setting it to itself
     public void setStops(ArrayList<HashMap<String, String>> inStops) {
     	stops = inStops;
-    	int foo = 5;
+    }
+    
+    public void setHour1(String inHour) {
+    	hour1Selected = inHour;
+    }
+    
+    public void setMinute1(String inMinute) {
+    	minute1Selected = inMinute;
+    }
+    
+    public void setHour2(String inHour) {
+    	hour2Selected = inHour;
+    }
+    
+    public void setMinute2(String inMinute) {
+    	minute2Selected = inMinute;
+    }
+    
+    public void fillBusStopSpinner(ArrayList<HashMap<String, String>> inStops)
+    {
+    	//Loop over stops and add the bus stop labels into the list
+    	List<String> list = new ArrayList<String>();
+    	
+    	for (int i = 0; i < inStops.size(); i++) {
+    		if (inStops.get(i) != null) {
+    			list.add(inStops.get(i).get("label"));
+    		}
+    	}
+
+        Spinner stop_spinner = (Spinner) findViewById(R.id.stop_spinner);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.simple_spinner_item, list);
+        dataAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        stop_spinner.setAdapter(dataAdapter);
     }
 	
 	public class MyItemSelectedListener implements OnItemSelectedListener {
@@ -91,8 +201,68 @@ public class Alert extends Activity{
 	        
 	        //Now call the XML getter
 			XMLTask task = new XMLTask();
-			int routeInt = Integer.parseInt(routeSelected);		//Cast to int
+			int routeInt = routeID.get(routeSelected);		//Get the integer of the route from the hashMap
 		    task.execute(new Integer[] { routeInt });		//Get stops for selected route
+	    }
+
+	    public void onNothingSelected(AdapterView<?> parent) {
+	        // Do nothing.
+	    }
+	}
+	
+	public class Hour1SelectedListener implements OnItemSelectedListener {
+		
+		//Callback function
+	    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+	        String hour = parent.getItemAtPosition(pos).toString();
+	        
+	        //Now save the input
+	        setHour1(hour);	        
+	    }
+
+	    public void onNothingSelected(AdapterView<?> parent) {
+	        // Do nothing.
+	    }
+	}
+	
+	public class Minute1SelectedListener implements OnItemSelectedListener {
+		
+		//Callback function
+	    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+	        String minute = parent.getItemAtPosition(pos).toString();
+	        
+	        //Now save the input
+	        setMinute1(minute);	        
+	    }
+
+	    public void onNothingSelected(AdapterView<?> parent) {
+	        // Do nothing.
+	    }
+	}
+	
+public class Hour2SelectedListener implements OnItemSelectedListener {
+		
+		//Callback function
+	    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+	        String hour = parent.getItemAtPosition(pos).toString();
+	        
+	        //Now save the input
+	        setHour2(hour);	        
+	    }
+
+	    public void onNothingSelected(AdapterView<?> parent) {
+	        // Do nothing.
+	    }
+	}
+	
+	public class Minute2SelectedListener implements OnItemSelectedListener {
+		
+		//Callback function
+	    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+	        String minute = parent.getItemAtPosition(pos).toString();
+	        
+	        //Now save the input
+	        setMinute2(minute);	        
 	    }
 
 	    public void onNothingSelected(AdapterView<?> parent) {
@@ -132,10 +302,13 @@ public class Alert extends Activity{
 	            
 	            // adding HashList to ArrayList
 	            stops.add(map);
-	        }
+	        }	    	
 	    	
-	    	int foo = 5;
-	    	//setStops(stops);
+	    	//Now set the bus stop spinner
+	    	fillBusStopSpinner(stops);
+	    	
+	    	//Save the values in the main thread after all processing is finished
+	    	setStops(stops);
 	    }
 
 		@Override
