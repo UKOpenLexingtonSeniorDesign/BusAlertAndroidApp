@@ -1,8 +1,11 @@
 package io.github.ukopenlexingtonseniordesign.busalert;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +13,10 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import junit.framework.Assert;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -22,6 +29,19 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.*;
+import com.google.android.gms.maps.MapFragment;
+
+
+
+
+
+
+
+
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -39,6 +59,7 @@ public class Map extends Activity{
 	private String kmlToOverlay;
 	static final String KEY_INFO = "info";
 	static final String KEY_KML = "trace_kml_url";
+	static GoogleMap map;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -76,6 +97,8 @@ public class Map extends Activity{
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.map);
+		
+		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		
 	    //FIX!!!: Using a temporary fix to fill the route spinner (hard coded xml). Will not be able to track a new route that Lextran adds.
 		// Create an ArrayAdapter using the string array and a default spinner layout
@@ -126,20 +149,32 @@ public class Map extends Activity{
 		    
 	    	Document doc = getDomElement(xml);
 	    	//get each stop
-	    	NodeList nl = doc.getElementsByTagName(KEY_INFO);    	
+	    	NodeList nl = doc.getElementsByTagName(KEY_INFO);
+	    	
 	    	for (int i = 0; i < nl.getLength(); i++) {
 	            Element e = (Element) nl.item(i);
-	            
-	            //CHANGES NEEDED HERE?
 	            kml_url = kml_url + e.getAttribute(KEY_KML);
+	               
 	        }	    	
 	    	
 	    	//		******* Do Something With KML Here ********
 	    	//Google KML Tutorial:  https://developers.google.com/kml/documentation/kml_tut
 	    	//In Android: 			http://stackoverflow.com/questions/3109158/how-to-draw-a-path-on-a-map-using-kml-file/3109723#3109723
+	    	//Another good in Android example: http://tw.tonytuan.org/2009/06/android-driving-direction-route-path.html
+	    	//Or we could just show route as PolyLine: https://developers.google.com/maps/documentation/android/reference/com/google/android/gms/maps/model/Polyline
 	    	
-	    	
-	    	
+	    	//Parse KML for coordinates, give PolyLine list of coordinates
+	    	 
+	    	//not sure this is correct, haven't tested. 
+	    	String myCoordinates = "";
+	    	NavigationDataSet myNavDataSet = GetNavigationDataSet(kml_url);
+	    	ArrayList<Placemark> myPlacemarks = myNavDataSet.getPlacemarks();
+	    	for( Placemark p : myPlacemarks){
+	    		if(p.getCoordinates() != null && myCoordinates==""){
+	    			myCoordinates = p.getCoordinates();
+	    		}
+	    	}
+	    	//then would need to parse myCoordinates string and pass to Polyline
 	    	
 	    	
 	    	
@@ -197,4 +232,57 @@ public class Map extends Activity{
                 // return DOM
             return doc;
 	}
+	
+	public static NavigationDataSet GetNavigationDataSet(String url) {
+		int LOG_LEVEL = 3;
+		String TAG = "NavigationDataSet";
+        NavigationDataSet navigationDataSet = null;
+        try
+            { 
+        	if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "url[" + url + "]");
+            final URL aUrl = new URL(url); 
+            if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Connecting...");
+            final URLConnection conn = aUrl.openConnection();
+//            conn.setReadTimeout(15 * 1000);  // timeout for reading the google maps data: 15 secs
+            conn.connect();
+            
+            if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Connected...");
+            /* Get a SAXParser from the SAXPArserFactory. */
+            SAXParserFactory spf = SAXParserFactory.newInstance(); 
+            SAXParser sp = spf.newSAXParser(); 
+ 
+            /* Get the XMLReader of the SAXParser we created. */
+            XMLReader xr = sp.getXMLReader();
+ 
+            /* Create a new ContentHandler and apply it to the XML-Reader*/ 
+            NavigationSaxHandler navSax2Handler = new NavigationSaxHandler(); 
+            xr.setContentHandler(navSax2Handler); 
+            
+            if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Parse Stream");
+            /* Parse the xml-data from our URL. */ 
+            xr.parse(new InputSource(aUrl.openStream()));
+            
+            if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Get data frm Parser");
+            /* Our NavigationSaxHandler now provides the parsed data to us. */ 
+            navigationDataSet = navSax2Handler.getParsedData(); 
+ 
+        } catch (Exception e) {
+        	if(LOG_LEVEL <= Log.ERROR)Log.e(TAG, "error getting route info", e);
+            navigationDataSet = null;
+        }   
+ 
+        return navigationDataSet;
+    }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
