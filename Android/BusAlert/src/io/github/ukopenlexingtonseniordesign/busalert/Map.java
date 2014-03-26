@@ -174,7 +174,6 @@ public class Map extends Activity{
 	    	//Parse KML for coordinates, give PolyLine list of coordinates
 	    	 
 	    	//not sure this is correct, haven't tested. 
-
 	    	/*
 	    	String myCoordinates = "";
 	    	NavigationDataSet myNavDataSet = GetNavigationDataSet(kml_url);
@@ -185,11 +184,13 @@ public class Map extends Activity{
 	    		}
 	    	}
 	    	*/
-
-	    	// get the kml (XML) doc. And parse it to get the coordinates(direction route). 
-	   
 	    	
-	    	//then would need to parse myCoordinates string and pass to Polyline
+	    	//Hardcoded the coordinates of the routes into the RouteCoord class. Use it to get a HashMap of the name of route linked to coords
+	    	RouteCoord routeCoord = new RouteCoord();
+	    	HashMap<String, ArrayList<ArrayList<String>>> routeCoordinates = routeCoord.buildHashMap();
+	    	
+	    	//Read the coordinates for the selected route and add to polyLine
+	    	
 	    	
 	    	
 	    	
