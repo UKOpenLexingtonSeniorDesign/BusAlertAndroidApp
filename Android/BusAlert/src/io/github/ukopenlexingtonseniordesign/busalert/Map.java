@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -43,6 +45,10 @@ import com.google.android.gms.maps.MapFragment;
 
 
 
+
+import com.google.android.gms.maps.MapView;
+import com.google.android.maps.GeoPoint;
+
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -59,6 +65,8 @@ public class Map extends Activity{
 	private String kmlToOverlay;
 	static final String KEY_INFO = "info";
 	static final String KEY_KML = "trace_kml_url";
+	static final String KEY_COORD = "coordinates";
+	static final String KEY_LINE_STRING = "LineString";
 	static GoogleMap map;
 	
 	@Override
@@ -166,6 +174,8 @@ public class Map extends Activity{
 	    	//Parse KML for coordinates, give PolyLine list of coordinates
 	    	 
 	    	//not sure this is correct, haven't tested. 
+
+	    	/*
 	    	String myCoordinates = "";
 	    	NavigationDataSet myNavDataSet = GetNavigationDataSet(kml_url);
 	    	ArrayList<Placemark> myPlacemarks = myNavDataSet.getPlacemarks();
@@ -174,6 +184,11 @@ public class Map extends Activity{
 	    			myCoordinates = p.getCoordinates();
 	    		}
 	    	}
+	    	*/
+
+	    	// get the kml (XML) doc. And parse it to get the coordinates(direction route). 
+	   
+	    	
 	    	//then would need to parse myCoordinates string and pass to Polyline
 	    	
 	    	
@@ -243,7 +258,7 @@ public class Map extends Activity{
             final URL aUrl = new URL(url); 
             if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Connecting...");
             final URLConnection conn = aUrl.openConnection();
-//            conn.setReadTimeout(15 * 1000);  // timeout for reading the google maps data: 15 secs
+            //conn.setReadTimeout(15 * 1000);  // timeout for reading the google maps data: 15 secs
             conn.connect();
             
             if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Connected...");
