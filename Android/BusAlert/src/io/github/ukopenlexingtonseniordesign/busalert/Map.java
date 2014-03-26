@@ -35,6 +35,7 @@ import org.xml.sax.XMLReader;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.*;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.MapFragment;
 
 
@@ -67,7 +68,7 @@ public class Map extends Activity{
 	static final String KEY_KML = "trace_kml_url";
 	static final String KEY_COORD = "coordinates";
 	static final String KEY_LINE_STRING = "LineString";
-	static GoogleMap map;
+	private static GoogleMap map;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -148,6 +149,7 @@ public class Map extends Activity{
 	        // For example showing a Dialog to give some feedback to the user.
 	    }
 
+	    //Callback method
 	    @Override
 	    protected void onPostExecute(String xml) {
 	        // If you have created a Dialog, here is the place to dismiss it.
@@ -155,14 +157,13 @@ public class Map extends Activity{
 	    	
 		    String kml_url = "http://realtime.lextran.com";
 		    
+		    
 	    	Document doc = getDomElement(xml);
-	    	//get each stop
 	    	NodeList nl = doc.getElementsByTagName(KEY_INFO);
 	    	
 	    	for (int i = 0; i < nl.getLength(); i++) {
 	            Element e = (Element) nl.item(i);
 	            kml_url = kml_url + e.getAttribute(KEY_KML);
-	               
 	        }	    	
 	    	
 	    	//		******* Do Something With KML Here ********
@@ -185,22 +186,19 @@ public class Map extends Activity{
 	    	}
 	    	*/
 	    	
-	    	//Hardcoded the coordinates of the routes into the RouteCoord class. Use it to get a HashMap of the name of route linked to coords
-	    	RouteCoord routeCoord = new RouteCoord();
-	    	HashMap<String, ArrayList<ArrayList<String>>> routeCoordinates = routeCoord.buildHashMap();
+	    	//Hardcoded the coordinates of the routes into the RouteCoord class. Use it to get a list of the coords to draw
+	    	RouteCoord routeCoord = new RouteCoord();	    	
+	    	ArrayList<LatLng> routeCoordinates = routeCoord.buildCoordList(routeSelected);
 	    	
-	    	//Read the coordinates for the selected route and add to polyLine
-	    	
-	    	
-	    	
+	    	//Now draw on map
+	    	drawOnMap(routeCoordinates);
 	    	
 	    	//Save the values in the main thread after all processing is finished
-	    	setKML(kml_url);
+	    	//setKML(kml_url);	//Not necessary if hardcoded
 	    }
 
 		@Override
 		protected String doInBackground(Integer... stops) {
-			
 			url = url + stops[0];
 	        try {	        	
 	            // defaultHttpClient
@@ -221,6 +219,27 @@ public class Map extends Activity{
 		
 	        //return xml
 	        return xml;
+		}
+		
+		public void drawOnMap(ArrayList<LatLng> inCoordinates) {
+	    	//Read the coordinates for the selected route and add to polyLine
+	    	//Find the map that is on our page
+	    	 map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+	    	 
+	    	 //Now draw on the map
+	    	 if (map != null) {
+	    		 map.clear();
+	    		 
+	    		 //Create the PolylineOptions that contains all of our coordinates as vertices
+	    		 PolylineOptions polyOptions = new PolylineOptions();	    		 
+	    		 polyOptions.addAll(inCoordinates);			//Add all our coordinates to the polyOptions
+	    		 polyOptions.color(0xffdd4444);
+	    		 
+	    		 //Now add the polyline to the map
+	    		 map.addPolyline(polyOptions);
+	    		 
+	    		 map.moveCamera(CameraUpdateFactory.newLatLngZoom(inCoordinates.get(0), 15));
+	    	 }   
 		}
 	}
 	
