@@ -188,7 +188,7 @@ public class Map extends Activity{
 	    	
 	    	//Hardcoded the coordinates of the routes into the RouteCoord class. Use it to get a list of the coords to draw
 	    	RouteCoord routeCoord = new RouteCoord();	    	
-	    	ArrayList<LatLng> routeCoordinates = routeCoord.buildCoordList(routeSelected);
+	    	ArrayList<ArrayList<LatLng>> routeCoordinates = routeCoord.buildCoordList(routeSelected);
 	    	
 	    	//Now draw on map
 	    	drawOnMap(routeCoordinates);
@@ -221,7 +221,7 @@ public class Map extends Activity{
 	        return xml;
 		}
 		
-		public void drawOnMap(ArrayList<LatLng> inCoordinates) {
+		public void drawOnMap(ArrayList<ArrayList<LatLng>> inCoordinates) {
 	    	//Read the coordinates for the selected route and add to polyLine
 	    	//Find the map that is on our page
 	    	 map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -230,15 +230,18 @@ public class Map extends Activity{
 	    	 if (map != null) {
 	    		 map.clear();
 	    		 
-	    		 //Create the PolylineOptions that contains all of our coordinates as vertices
-	    		 PolylineOptions polyOptions = new PolylineOptions();	    		 
-	    		 polyOptions.addAll(inCoordinates);			//Add all our coordinates to the polyOptions
-	    		 polyOptions.color(0xffdd4444);
+	    		 //Add a polyline to the map for each line that we draw
+	    		 for (int line = 0; line < inCoordinates.size(); line++) {
+		    		 //Create the PolylineOptions that contains all of our coordinates as vertices
+		    		 PolylineOptions polyOptions = new PolylineOptions();	    		 
+		    		 polyOptions.addAll(inCoordinates.get(line));		//Add all our coordinates to the polyOptions
+		    		 polyOptions.color(0xffdd4444);
+		    		 
+		    		 //Now add the polyline to the map
+		    		 map.addPolyline(polyOptions);
+	    		 }
 	    		 
-	    		 //Now add the polyline to the map
-	    		 map.addPolyline(polyOptions);
-	    		 
-	    		 map.moveCamera(CameraUpdateFactory.newLatLngZoom(inCoordinates.get(0), 15));
+	    		 map.moveCamera(CameraUpdateFactory.newLatLngZoom(inCoordinates.get(0).get(0), 25));
 	    	 }   
 		}
 	}
