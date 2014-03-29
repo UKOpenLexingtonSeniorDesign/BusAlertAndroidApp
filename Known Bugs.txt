@@ -1,0 +1,1 @@
+-After going to map screen then trying to go back the app will exit.

@@ -10,7 +10,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -36,6 +39,7 @@ import org.xml.sax.XMLReader;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
 
 
@@ -51,6 +55,9 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.maps.GeoPoint;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.LevelListDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -60,14 +67,20 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-public class Map extends Activity{
-	HashMap<String, Integer> routeID = new HashMap<String, Integer>();
+public class Map extends Activity{	
+	private HashMap<String, Integer> routeID = new HashMap<String, Integer>();
+	private ArrayList<Stop> stopsList = new ArrayList<Stop>();	//Array list to hold stop info for route
+    ArrayList<String> departTimes = new ArrayList<String>();
+    Stop currentStop;
 	private String routeSelected;
-	private String kmlToOverlay;
-	static final String KEY_INFO = "info";
-	static final String KEY_KML = "trace_kml_url";
-	static final String KEY_COORD = "coordinates";
-	static final String KEY_LINE_STRING = "LineString";
+	//static final String KEY_INFO = "info";
+	//static final String KEY_KML = "trace_kml_url";
+	static final String KEY_STOP = "stop";
+	static final String KEY_LNG = "lng";
+	static final String KEY_LAT = "lat";
+	static final String KEY_LABEL = "label";
+	static final String KEY_HTML = "html";
+	//static final String KEY_LINE_STRING = "LineString";
 	private static GoogleMap map;
 	
 	@Override
@@ -109,6 +122,33 @@ public class Map extends Activity{
 		
 		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		
+		//Add a markerclicklistener to the map
+		map.setOnMarkerClickListener(new OnMarkerClickListener() {
+
+			@Override
+			public boolean onMarkerClick(Marker arg0) {
+				String htmlTag = arg0.getSnippet();
+				
+   			 	//Get the estimated arrivals for this stop
+				HTMLTask htmlTask = new HTMLTask();
+			    htmlTask.execute(new String[] { htmlTag });		//Get stops for selected route
+			    
+			    String times;
+			    try {
+					times = htmlTask.get();					//Get the string that is the times
+					arg0.setSnippet(times);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+				
+			    arg0.showInfoWindow();
+				return true;
+			}
+			
+		});
+		
 	    //FIX!!!: Using a temporary fix to fill the route spinner (hard coded xml). Will not be able to track a new route that Lextran adds.
 		// Create an ArrayAdapter using the string array and a default spinner layout
         Spinner map_route_spinner = (Spinner) findViewById(R.id.map_route_spinner);
@@ -118,9 +158,11 @@ public class Map extends Activity{
 		map_route_spinner.setOnItemSelectedListener(new RouteItemSelectedListener());
 	}
 	
+	/*
 	public void setKML(String inKML) {
 		kmlToOverlay = inKML;
 	}
+	*/
 	
 	public class RouteItemSelectedListener implements OnItemSelectedListener {
 			
@@ -128,7 +170,7 @@ public class Map extends Activity{
 		    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 		        routeSelected = parent.getItemAtPosition(pos).toString();
 		        
-		        //Now call the XML getter
+		        //Now call the XML getter in order to get the stops for the selected route
 				XMLTask task = new XMLTask();
 				int routeInt = routeID.get(routeSelected);		//Get the integer of the route from the hashMap
 			    task.execute(new Integer[] { routeInt });		//Get stops for selected route
@@ -139,67 +181,15 @@ public class Map extends Activity{
 		    }
 	}
 	
+	//Use to get the stops, lats, and longs for the selected route
 	private class XMLTask extends AsyncTask<Integer, String, String> {
-        String xml = null;
-        String url = "http://realtime.lextran.com/InfoPoint/map/GetRouteXml.ashx?RouteID=";
-		
-	    @Override
-	    protected void onPreExecute() {
-	        // Do stuff
-	        // For example showing a Dialog to give some feedback to the user.
-	    }
-
-	    //Callback method
-	    @Override
-	    protected void onPostExecute(String xml) {
-	        // If you have created a Dialog, here is the place to dismiss it.
-	        // The `xml` that you returned will be passed to this method
-	    	
-		    String kml_url = "http://realtime.lextran.com";
-		    
-		    
-	    	Document doc = getDomElement(xml);
-	    	NodeList nl = doc.getElementsByTagName(KEY_INFO);
-	    	
-	    	for (int i = 0; i < nl.getLength(); i++) {
-	            Element e = (Element) nl.item(i);
-	            kml_url = kml_url + e.getAttribute(KEY_KML);
-	        }	    	
-	    	
-	    	//		******* Do Something With KML Here ********
-	    	//Google KML Tutorial:  https://developers.google.com/kml/documentation/kml_tut
-	    	//In Android: 			http://stackoverflow.com/questions/3109158/how-to-draw-a-path-on-a-map-using-kml-file/3109723#3109723
-	    	//Another good in Android example: http://tw.tonytuan.org/2009/06/android-driving-direction-route-path.html
-	    	//Or we could just show route as PolyLine: https://developers.google.com/maps/documentation/android/reference/com/google/android/gms/maps/model/Polyline
-	    	
-	    	//Parse KML for coordinates, give PolyLine list of coordinates
-	    	 
-	    	//not sure this is correct, haven't tested. 
-	    	/*
-	    	String myCoordinates = "";
-	    	NavigationDataSet myNavDataSet = GetNavigationDataSet(kml_url);
-	    	ArrayList<Placemark> myPlacemarks = myNavDataSet.getPlacemarks();
-	    	for( Placemark p : myPlacemarks){
-	    		if(p.getCoordinates() != null && myCoordinates==""){
-	    			myCoordinates = p.getCoordinates();
-	    		}
-	    	}
-	    	*/
-	    	
-	    	//Hardcoded the coordinates of the routes into the RouteCoord class. Use it to get a list of the coords to draw
-	    	RouteCoord routeCoord = new RouteCoord();	    	
-	    	ArrayList<ArrayList<LatLng>> routeCoordinates = routeCoord.buildCoordList(routeSelected);
-	    	
-	    	//Now draw on map
-	    	drawOnMap(routeCoordinates);
-	    	
-	    	//Save the values in the main thread after all processing is finished
-	    	//setKML(kml_url);	//Not necessary if hardcoded
-	    }
-
+        private String xml = null;
+        private String url = "http://realtime.lextran.com/InfoPoint/map/GetRouteXml.ashx?RouteID=";
+        private final LatLng LEXINGTON = new LatLng(38.042053, -84.502550);
+        
 		@Override
-		protected String doInBackground(Integer... stops) {
-			url = url + stops[0];
+		protected String doInBackground(Integer... route) {
+			url = url + route[0];
 	        try {	        	
 	            // defaultHttpClient
 	            DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -220,8 +210,65 @@ public class Map extends Activity{
 	        //return xml
 	        return xml;
 		}
+        
+	    //Callback method
+	    @Override
+	    protected void onPostExecute(String xml) {
+	        // If you have created a Dialog, here is the place to dismiss it.
+	        // The `xml` that you returned will be passed to this method
+		    
+	    	//To Get KML
+	    	/*
+	    	String kml_url = "http://realtime.lextran.com"
+	    	Document doc = getDomElement(xml);
+	    	NodeList nl = doc.getElementsByTagName(KEY_INFO);
+	    	
+	    	for (int i = 0; i < nl.getLength(); i++) {
+	            Element e = (Element) nl.item(i);
+	            kml_url = kml_url + e.getAttribute(KEY_KML);
+	        }
+	        */	    	
+	    	
+	    	//To Get Route Stop Coords
+	    	String lng;
+	    	String lat;
+	    	String label;
+	    	String html;
+	    	
+	    	Document doc = getDomElement(xml);
+	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);
+	    	
+	    	for (int i = 0; i < nl.getLength(); i++) {
+	            Element e = (Element) nl.item(i);
+	            lng = e.getAttribute(KEY_LNG);
+	            lat = e.getAttribute(KEY_LAT);
+	            label = e.getAttribute(KEY_LABEL);
+	            html = e.getAttribute(KEY_HTML);
+	            
+	            //Take this data, create a LatLgn object, create a stop, then add to our list of stops
+	            stopsList.add(new Stop(label, new LatLng(Double.parseDouble(lat), Double.parseDouble(lng)), html));
+	        }
+	    	
+	    	//		******* Do Something With KML Here ********
+	    	//Google KML Tutorial:  https://developers.google.com/kml/documentation/kml_tut
+	    	//In Android: 			http://stackoverflow.com/questions/3109158/how-to-draw-a-path-on-a-map-using-kml-file/3109723#3109723
+	    	//Another good in Android example: http://tw.tonytuan.org/2009/06/android-driving-direction-route-path.html
+	    	//Or we could just show route as PolyLine: https://developers.google.com/maps/documentation/android/reference/com/google/android/gms/maps/model/Polyline
+	    	
+	    	//Parse KML for coordinates, give PolyLine list of coordinates
+	    	//not sure this is correct, haven't tested. 
+	    	
+	    	//For route drawing
+	    	//Hardcoded the coordinates of the routes into the RouteCoord class. Use it to get a list of the coords to draw. For the route drawing
+	    	//RouteCoord routeCoord = new RouteCoord();	    	
+	    	//ArrayList<ArrayList<LatLng>> routeCoordinates = routeCoord.buildCoordList(routeSelected);
+	    	
+	    	//For drawing the stop markers
+	    	drawStopsOnMap(stopsList);
+	    }
 		
-		public void drawOnMap(ArrayList<ArrayList<LatLng>> inCoordinates) {
+		/*
+		public void drawRouteOnMap(ArrayList<ArrayList<LatLng>> inCoordinates) {
 	    	//Read the coordinates for the selected route and add to polyLine
 	    	//Find the map that is on our page
 	    	 map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -244,6 +291,133 @@ public class Map extends Activity{
 	    		 map.moveCamera(CameraUpdateFactory.newLatLngZoom(inCoordinates.get(0).get(0), 25));
 	    	 }   
 		}
+		*/
+		
+		public void drawStopsOnMap(ArrayList<Stop> inStops) {			
+			//Find the map that is on our page
+	    	 map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+	    	 
+	    	 //Now draw on the map
+	    	 if (map != null) {
+	    		 map.clear();
+	    		 
+	    		 for (Stop stop : inStops) {
+	    			 currentStop = stop;
+	    			 
+	    			 /*
+	    			 //Get the estimated arrivals for this stop
+	    			 String stopUrl = "http://realtime.lextran.com/InfoPoint/departures.aspx?stopid=";
+	    			 HTMLTask htmlTask = new HTMLTask();
+	 				 String stopHtml = stop.getHtmlTag();		//Get the integer of the route from the hashMap
+	 			     htmlTask.execute(new String[] { stopHtml });		//Get stops for selected route
+	    			 */
+	    			 
+	    			 //Create marker
+	    			 map.addMarker(new MarkerOptions()
+	    			 		.position(stop.getLatLng())
+	    			 		.title(stop.getName())
+	    			 		.snippet(stop.getHtmlTag())		//Make the snippet the html tag so we can get it later
+	    			 		.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
+	    					 );
+	    		 }
+	    		 
+	    		 map.moveCamera(CameraUpdateFactory.newLatLngZoom(LEXINGTON, 12));	//Zoom to the first stop in keyset (random)
+	    	 }   
+		}
+	}
+	
+	//Used in getting and parsing the departure times for a stop
+	private class HTMLTask extends AsyncTask<String, String, String> {
+        private String url = "http://realtime.lextran.com/InfoPoint/departures.aspx?stopid=";
+        
+		@Override
+		protected String doInBackground(String... stop) {
+			String html = null;
+			
+			url = url + stop[0];
+	        try {	        	
+	            // defaultHttpClient
+	            DefaultHttpClient httpClient = new DefaultHttpClient();
+	            HttpPost httpPost = new HttpPost(url);
+	 
+	            HttpResponse httpResponse = httpClient.execute(httpPost);
+	            HttpEntity httpEntity = httpResponse.getEntity();
+	            html = EntityUtils.toString(httpEntity);
+	 
+	        } catch (UnsupportedEncodingException e) {
+	            e.printStackTrace();
+	        } catch (ClientProtocolException e) {
+	            e.printStackTrace();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+		
+	        //return html as string
+	        //return html;
+	        
+	    	//Now parse the html and get out the times of departures for the stop
+	    	departTimes = parseDepartTimes(html);
+	    
+			//Combine into one string so we can add to a Marker.snippet
+			StringBuilder sb = new StringBuilder("");
+			for (String s : departTimes) {
+				sb.append(s + "\n");
+			}
+			
+			return sb.toString();
+		}
+        
+	    //Callback method
+	    @Override
+	    protected void onPostExecute(String inHtml) {
+	    	/*
+	        // If you have created a Dialog, here is the place to dismiss it.
+	        // The `html` that you returned will be passed to this method   	
+	    	
+	    	//Now parse the html and get out the times of departures for the stop
+	    	departTimes = parseDepartTimes(inHtml);
+	    	
+	    	
+	    	//Find the map that is on our page
+	    	 map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+	    	 
+	    	 //Now draw on the map
+	    	 if (map != null) {
+	    		 map.clear();
+	    		 
+			     //Combine into one string so we can add to a Marker.snippet
+			     StringBuilder sb = new StringBuilder("");
+			     for (String s : departTimes) {
+			    	 sb.append(s + "\n");
+			     }
+				 
+				 //Create marker
+				 map.addMarker(new MarkerOptions()
+				 		.position(currentStop.getLatLng())
+				 		.title(currentStop.getName())
+				 		.snippet(sb.toString())
+						 );
+	    	 }
+	    	 */
+		}
+	    
+	    /*
+	    private ArrayList<String> parseDepartTimes(String inHtml) {
+	    	ArrayList<String> toReturn = new ArrayList<String>();
+	    	
+	    	int index = inHtml.indexOf("<div class='departure'>");
+	    	while (index != -1) {
+	    		index = index + 23;		//Advance index the number of chars that our search consists of
+	    		String time = inHtml.substring(index, index + 8);
+	    		toReturn.add(time);	//Add the time to our list
+	    		index = index + 14;		//Advance the 14 chars for the length of the time and closing tag
+	    		
+	    		index = inHtml.indexOf("<div class='departure'>", index);	//Search for the next occurence
+	    	}
+	    	
+	    	return toReturn;
+	    }
+	    */
 	}
 	
 	public Document getDomElement(String xml){
@@ -312,13 +486,45 @@ public class Map extends Activity{
         return navigationDataSet;
     }
 	
+	private class Stop {
+		private LatLng latlng;
+		private String htmlTag;
+		private String name;
+		
+		Stop(String inName, LatLng inLatLng, String inHTMLTag) {
+			latlng = inLatLng;
+			htmlTag = inHTMLTag;
+			name = inName;
+		}
+		
+		public LatLng getLatLng() {
+			return latlng;
+		}
+		
+		public String getHtmlTag() {
+			return htmlTag;
+		}
+		
+		public String getName() {
+			return name;
+		}
+	}
 	
-	
-	
-	
-	
-	
-	
+    private ArrayList<String> parseDepartTimes(String inHtml) {
+    	ArrayList<String> toReturn = new ArrayList<String>();
+    	
+    	int index = inHtml.indexOf("<div class='departure'>");
+    	while (index != -1) {
+    		index = index + 23;		//Advance index the number of chars that our search consists of
+    		String time = inHtml.substring(index, index + 8);
+    		toReturn.add(time);	//Add the time to our list
+    		index = index + 14;		//Advance the 14 chars for the length of the time and closing tag
+    		
+    		index = inHtml.indexOf("<div class='departure'>", index);	//Search for the next occurence
+    	}
+    	
+    	return toReturn;
+    }
 	
 	
 	
