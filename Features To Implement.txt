@@ -1,0 +1,8 @@
+Critical:
+-Notification
+-On live map display "incoming" and "departing" separately
+	-Use a custom snippet I believe
+	
+Optional if time:
+-Color optimization on pages and text
+-Dynamic querying of the routes
