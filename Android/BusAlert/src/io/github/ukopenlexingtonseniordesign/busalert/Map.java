@@ -70,7 +70,7 @@ import android.widget.AdapterView.OnItemSelectedListener;
 public class Map extends Activity{	
 	private HashMap<String, Integer> routeID = new HashMap<String, Integer>();
 	private ArrayList<Stop> stopsList = new ArrayList<Stop>();	//Array list to hold stop info for route
-    ArrayList<String> departTimes = new ArrayList<String>();
+    String departTimes;
     Stop currentStop;
 	private String routeSelected;
 	//static final String KEY_INFO = "info";
@@ -122,11 +122,14 @@ public class Map extends Activity{
 		
 		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		
+		map.setInfoWindowAdapter(new MapPopup(getLayoutInflater()));
+		
 		//Add a markerclicklistener to the map
 		map.setOnMarkerClickListener(new OnMarkerClickListener() {
 
 			@Override
 			public boolean onMarkerClick(Marker arg0) {
+				String oldSnippet = arg0.getSnippet();
 				String htmlTag = arg0.getSnippet();
 				
    			 	//Get the estimated arrivals for this stop
@@ -144,6 +147,10 @@ public class Map extends Activity{
 				}
 				
 			    arg0.showInfoWindow();
+			    
+			    //Change the snippet bag to the html identifier. The info windows displayed are actually converted to flat images, so this shouldn't change the view.
+			    arg0.setSnippet(oldSnippet);			    
+			    
 				return true;
 			}
 			
@@ -358,13 +365,15 @@ public class Map extends Activity{
 	    	//Now parse the html and get out the times of departures for the stop
 	    	departTimes = parseDepartTimes(html);
 	    
+	    	/*		String is built in parseDepartTimes for the new version
 			//Combine into one string so we can add to a Marker.snippet
 			StringBuilder sb = new StringBuilder("");
 			for (String s : departTimes) {
 				sb.append(s + "\n");
 			}
+			*/
 			
-			return sb.toString();
+			return departTimes;
 		}
         
 	    //Callback method
@@ -510,9 +519,10 @@ public class Map extends Activity{
 		}
 	}
 	
-    private ArrayList<String> parseDepartTimes(String inHtml) {
-    	ArrayList<String> toReturn = new ArrayList<String>();
-    	
+    private String parseDepartTimes(String inHtml) {
+    	//ArrayList<ArrayList<String>> toReturn = new ArrayList<ArrayList<String>>();    	
+    	/*
+  		//Old version that returned an array of strings as the times. New version just builds the string itself
     	int index = inHtml.indexOf("<div class='departure'>");
     	while (index != -1) {
     		index = index + 23;		//Advance index the number of chars that our search consists of
@@ -522,11 +532,69 @@ public class Map extends Activity{
     		
     		index = inHtml.indexOf("<div class='departure'>", index);	//Search for the next occurence
     	}
+    	*/
     	
-    	return toReturn;
+    	StringBuilder toReturn = new StringBuilder("");					//Initialize the return string
+    	toReturn.append("     Estimated Times of Departure     \n");
+    	
+    	/*
+    	//Add the first route to the builder
+    	int index = inHtml.indexOf("<div class='routeName'>");
+    	index = index + 23;												//Advance index past the route tag
+    	int endIndex = inHtml.indexOf("<", index);						//Find the index of the first character after the routename
+    	toReturn.append(inHtml.substring(index, endIndex) + ": \n");	//Appends the route name to the string 	
+    	
+    	while (index != -1) {
+    		index = inHtml.indexOf("<div class='departure'>", index);	//routename will allways be followed by the departure tag
+    		index = index + 23;		//Advance index the number of chars that our search consists of
+    		String time = inHtml.substring(index, index + 8);
+    		toReturn.add(time);	//Add the time to our list
+    		index = index + 14;		//Advance the 14 chars for the length of the time and closing tag
+    		
+    		index = inHtml.indexOf("<div class='routeName'>", index);	//Search for the next occurence
+    	}
+    	*/
+    	
+    	int index = 0;
+    	int routeIndex = 0;
+    	int routeEnd = 0;
+    	while (index != -1) {
+    		//First find the beginning and the ending indices of this route
+    		routeIndex = inHtml.indexOf("<div class='routeName'>", routeEnd);
+    		routeIndex = routeIndex + 23;											//Advance index past the routename tag
+    		int routeClose = inHtml.indexOf("</div>", routeIndex);					//Find the closing tag of the routename
+    		String routeName = "\n" + inHtml.substring(routeIndex, routeClose) + ": ";
+    		toReturn.append(routeName + "\n");		//Add the routename to the builder
+    		routeIndex = routeClose;												//Advance the index past the name of the route
+    		
+    		routeEnd = inHtml.indexOf("<div class='routeName'>", routeIndex);	//Either finds the beginning of the next route, or -1 as the EOF
+    		
+    		//If we are the last route of the file then the routeEnd will be -1. Thus this while loop will skip and we will do the operation once more outside a loop
+    		routeIndex = inHtml.indexOf("<div class='departure'>", routeIndex);
+    		while (routeIndex < routeEnd && routeIndex != -1) {
+    			routeIndex = routeIndex + 23;										//Advance past the departure tag
+    			String time = inHtml.substring(routeIndex, routeIndex + 8);
+    			toReturn.append("  " + time + "  ");
+    			
+    			routeIndex = inHtml.indexOf("<div class='departure'>", routeIndex);
+    		}
+    		
+    		//Ending condition
+    		if (routeEnd == -1) {
+    			index = -1;
+    			
+    			//Now add the departures for the final route
+    			routeIndex = inHtml.indexOf("<div class='departure'>", routeIndex);
+        		while (routeIndex != -1) {
+        			routeIndex = routeIndex + 23;										//Advance past the departure tag
+        			String time = inHtml.substring(routeIndex, routeIndex + 8);
+        			toReturn.append("  " + time + "  ");
+        			
+        			routeIndex = inHtml.indexOf("<div class='departure'>", routeIndex);
+        		}
+    		}
+    	}
+    	
+    	return toReturn.toString();
     }
-	
-	
-	
-	
 }
