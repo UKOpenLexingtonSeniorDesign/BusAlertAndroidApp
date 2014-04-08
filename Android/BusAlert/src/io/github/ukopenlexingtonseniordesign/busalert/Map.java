@@ -574,6 +574,12 @@ public class Map extends Activity{
     		while (routeIndex < routeEnd && routeIndex != -1) {
     			routeIndex = routeIndex + 23;										//Advance past the departure tag
     			String time = inHtml.substring(routeIndex, routeIndex + 8);
+    			
+    			//Check if the time is the done label
+    			if (time.equals("Done</di")) {
+    				time = "Done";
+    			}
+    			
     			toReturn.append("  " + time + "  ");
     			
     			routeIndex = inHtml.indexOf("<div class='departure'>", routeIndex);
@@ -588,6 +594,12 @@ public class Map extends Activity{
         		while (routeIndex != -1) {
         			routeIndex = routeIndex + 23;										//Advance past the departure tag
         			String time = inHtml.substring(routeIndex, routeIndex + 8);
+        			
+        			//Check if the time is the done label
+        			if (time.equals("Done</di")) {
+        				time = "Done";
+        			}
+        			
         			toReturn.append("  " + time + "  ");
         			
         			routeIndex = inHtml.indexOf("<div class='departure'>", routeIndex);
