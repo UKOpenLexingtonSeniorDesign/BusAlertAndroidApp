@@ -219,6 +219,9 @@ public class Map extends Activity{
 	    	String label;
 	    	String html;
 	    	
+	    	//Clear the current stops vector
+	    	stopsList.clear();
+	    	
 	    	Document doc = getDomElement(xml);
 	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);
 	    	
@@ -244,9 +247,8 @@ public class Map extends Activity{
 	    	 //Now draw on the map
 	    	 if (map != null) {
 	    		 
-	    		 //Reset map and stops list
+	    		 //Reset map
 	    		 map.clear();
-	    		 inStops.clear();
 	    		 
 	    		 for (Stop stop : inStops) {
 	    			 currentStop = stop;
