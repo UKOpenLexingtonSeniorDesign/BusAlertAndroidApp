@@ -243,7 +243,10 @@ public class Map extends Activity{
 	    	 
 	    	 //Now draw on the map
 	    	 if (map != null) {
+	    		 
+	    		 //Reset map and stops list
 	    		 map.clear();
+	    		 inStops.clear();
 	    		 
 	    		 for (Stop stop : inStops) {
 	    			 currentStop = stop;
