@@ -57,7 +57,7 @@ public class Alert2 extends Activity{
     private ScheduleClient scheduleClient;
     // This is the date picker used to select the date for our notification
     private TimePicker picker;
-    String stopSelected;
+    private String stopSelected;
     String routeSelected;
     String stopID;
 	ArrayList<HashMap<String, String>> stops;
@@ -183,11 +183,11 @@ public class Alert2 extends Activity{
     }
 	
 public class MyStopSelectedListener implements OnItemSelectedListener {
-		
+	String selected;	
+	
 		//Callback function
 	    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 	        stopSelected = parent.getItemAtPosition(pos).toString();
-	        
 	    }
 
 	    public void onNothingSelected(AdapterView<?> parent) {
@@ -349,8 +349,8 @@ public class MyStopSelectedListener implements OnItemSelectedListener {
 	    	
 	    	for (int i = 0; i < nl.getLength(); i++) {
 	            Element e = (Element) nl.item(i);
-	            //are the names in the XML files and in the spinner the same?
-	            if(e.getAttribute(KEY_LABEL) == stopSelected){
+
+	            if(e.getAttribute(KEY_LABEL).equals(stopSelected)){
 	            	//this is the right stop, save the hmtl tag
 	            	NotifyService.stopSelected = e.getAttribute(KEY_HTML);
 	            }

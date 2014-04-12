@@ -34,7 +34,7 @@ import android.util.Log;
  */
 public class NotifyService extends Service {
 	String departTimes;
-	static String stopSelected;
+	public static String stopSelected;
     /*
      * Class for clients to access
      */
