@@ -1,0 +1,49 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+ 
+    
+        <TextView
+		android:text="@string/route_label"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_gravity="left"
+		android:textSize="18sp"
+		android:layout_marginRight="5dip"
+		android:textColor="#ffffff"
+		android:textStyle="bold" />
+    	    
+    <Spinner
+		android:id="@+id/route_spinner"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+    
+    <TextView
+		android:text="@string/bus_stop_label"
+		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_gravity="left"
+		android:textSize="18sp"
+		android:layout_marginRight="5dip"
+		android:textColor="#ffffff"
+		android:textStyle="bold" />
+    	    
+    <Spinner
+		android:id="@+id/stop_spinner"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" />
+    
+    <TimePicker
+        android:id="@+id/scheduleTimePicker"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+ 
+    <Button
+        android:id="@+id/selectButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onDateSelectedButtonClick"
+        android:text="Set notification for this time" />
+ 
+</LinearLayout>

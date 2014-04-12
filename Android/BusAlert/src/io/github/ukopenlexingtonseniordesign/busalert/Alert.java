@@ -65,6 +65,10 @@ public class Alert extends Activity{
 	static final String KEY_HTML = "html";
 	HashMap<String, Integer> routeID = new HashMap<String, Integer>();
 	
+	
+	
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		//Fill the route id hashmap
@@ -123,6 +127,11 @@ public class Alert extends Activity{
 		// Apply the adapter to the spinner
 		minute1_spinner.setAdapter(minute1_adapter);
 		minute1_spinner.setOnItemSelectedListener(new Minute1SelectedListener());
+		
+		//setup the notification with the given route, stop, hour, and minute
+		
+		
+		///////Why have two alert times for the same bus route / stop. Do we need this stuff below
 		
 		//Fill the first hour spinner
 		Spinner hour2_spinner = (Spinner) findViewById(R.id.hour2_spinner);

@@ -28,7 +28,7 @@
 			android:text="@string/map_label" 
 			android:textColor="#ffffff"/>
 		<Button
-			android:id="@+id/alert_button"
+			android:id="@+id/alert2_button"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:text="@string/alert_label" 
