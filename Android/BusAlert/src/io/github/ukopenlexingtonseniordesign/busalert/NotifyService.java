@@ -123,7 +123,7 @@ public class NotifyService extends Service {
     }
     
     
-	private String parseDepartTimes(String inHtml) {    	
+	private String parseDepartTimes2(String inHtml) {    	
 		StringBuilder toReturn = new StringBuilder("");					//Initialize the return string
 		toReturn.append("     Estimated Times of Departure     \n");
 	
@@ -211,7 +211,8 @@ public class NotifyService extends Service {
 	        }
 		        
 	    	//Now parse the html and get out the times of departures for the stop
-	    	departTimes = parseDepartTimes(html);
+	        //multiple formats of the departure html????
+	    	departTimes = parseDepartTimes2(html);
 			
 			return departTimes;
 		}
