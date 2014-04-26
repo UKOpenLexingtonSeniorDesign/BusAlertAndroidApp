@@ -58,33 +58,4 @@ public class MainActivity extends Activity implements OnClickListener{
             break;
     	}
     }
-    
-    //Helper function that will be used in Alert2.java and Map.java
-	//Java pre-built helper tools that are used to parse XML.
-	static public Document getDomElement(String xml){
-		Document doc = null;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder db = dbf.newDocumentBuilder();
- 
-            //Set the input to our xml string
-            InputSource is = new InputSource();
-                is.setCharacterStream(new StringReader(xml));
-                doc = db.parse(is); 
- 
-            } catch (ParserConfigurationException e) {
-                Log.e("Error: ", e.getMessage());
-                return null;
-            } catch (SAXException e) {
-                Log.e("Error: ", e.getMessage());
-                return null;
-            } catch (IOException e) {
-                Log.e("Error: ", e.getMessage());
-                return null;
-            }
-            
-        	//return DOM
-            return doc;
-	}
-
 } 

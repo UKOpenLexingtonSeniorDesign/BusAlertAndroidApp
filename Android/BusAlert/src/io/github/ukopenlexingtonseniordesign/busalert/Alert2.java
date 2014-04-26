@@ -232,7 +232,7 @@ public class Alert2 extends Activity {
 	    protected void onPostExecute(String xml) {
 	    	//Initialize the list we will use to store the stops for the route
 		    stops = new ArrayList<HashMap<String, String>>();
-	    	Document doc = MainActivity.getDomElement(xml);		//Tool for parsing xml
+	    	Document doc = Helpers.getDomElement(xml);		//Tool for parsing xml
 	    	
 	    	//get each stop
 	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);    	
@@ -293,7 +293,7 @@ public class Alert2 extends Activity {
 	    @Override
 	    protected void onPostExecute(String html) {
 	        // The html that you returned will be passed to this method.	   	
-	    	Document doc = MainActivity.getDomElement(html);
+	    	Document doc = Helpers.getDomElement(html);
 	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);
 	    	
 	    	for (int i = 0; i < nl.getLength(); i++) {
