@@ -68,7 +68,7 @@ import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 public class Map extends Activity{	
-	private HashMap<String, Integer> routeID = new HashMap<String, Integer>();
+	private HashMap<String, Integer> routeID = new HashMap<String, Integer>();		//HashMap that maps the route names to their IDs
 	private ArrayList<Stop> stopsList = new ArrayList<Stop>();	//Array list to hold stop info for route
     String departTimes;
     Stop currentStop;
@@ -84,30 +84,8 @@ public class Map extends Activity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		//Fill the route id hashmap
-		routeID.put("Woodhill", 1);
-		routeID.put("Georgetown Road", 2);
-		routeID.put("Tates Creek Road", 3);
-		routeID.put("Newtown Pike", 4);
-		routeID.put("Nicholasville Road", 5);
-		routeID.put("North Broadway", 6);
-		routeID.put("North Limestone", 7);
-		routeID.put("Versailles Road", 8);
-		routeID.put("Eastland", 9);
-		routeID.put("Hamburg Pavillion", 10);
-		routeID.put("Richmond Road", 11);
-		routeID.put("Leestown Road", 12);
-		routeID.put("South Broadway", 13);
-		routeID.put("UK Commonwealth Stadium", 14);
-		routeID.put("Red Mile", 15);
-		routeID.put("BCTC Southland", 16);
-		routeID.put("Northside Connector", 17);
-		routeID.put("Centre Parkway Connector", 18);
-		routeID.put("Masterson Station", 20);
-		routeID.put("Keeneland Airport", 21);
-		routeID.put("Nicholasville Express", 22);
-		routeID.put("Trolley Blue Route", 24);
-		routeID.put("Trolley Green Route", 25);
-		routeID.put("Alexandria - UK Medical Center", 31);
+		RouteMap rm = new RouteMap();
+		routeID = rm.getRoutes();
 		
 		//Create a List<String> to use to fill the route spinner
 		List<String> map_route_list = new ArrayList<String>();
@@ -116,6 +94,8 @@ public class Map extends Activity{
 		}
 		
 		super.onCreate(savedInstanceState);
+		
+		//Get a reference to our map
 		setContentView(R.layout.map);
 		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		map.moveCamera(CameraUpdateFactory.newLatLngZoom(LEXINGTON, 11));	//Set the default zoom
@@ -124,33 +104,35 @@ public class Map extends Activity{
 		//Define a new markerclicklistener to the map
 		map.setOnMarkerClickListener(new OnMarkerClickListener() {
 
-			@Override
-			public boolean onMarkerClick(Marker arg0) {
-				String oldSnippet = arg0.getSnippet();
-				String htmlTag = arg0.getSnippet();
-				
-   			 	//Get the estimated arrivals for this stop
-				HTMLTask htmlTask = new HTMLTask();
-			    htmlTask.execute(new String[] { htmlTag });		//Get stops for selected route
-			    
-			    String times;
-			    try {
-					times = htmlTask.get();					//Get the string that is the times
-					arg0.setSnippet(times);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					e.printStackTrace();
-				}
-				
-			    arg0.showInfoWindow();
-			    
-			    //Change the snippet bag to the html identifier. The info windows displayed are actually converted to flat images, so this shouldn't change the view.
-			    arg0.setSnippet(oldSnippet);			    
-			    
-				return true;
+		//Method that is called when a map marker is clicked
+		@Override
+		public boolean onMarkerClick(Marker arg0) {
+			//The snippet holds the html tag of the stop
+			String oldSnippet = arg0.getSnippet();
+			String htmlTag = arg0.getSnippet();
+			
+		 	//Get the estimated arrivals for this stop
+			HTMLTask htmlTask = new HTMLTask();
+		    htmlTask.execute(new String[] { htmlTag });		//Get stops for selected route
+		    
+		    String times;
+		    try {
+				times = htmlTask.get();					//Get the string that is the times
+				arg0.setSnippet(times);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
 			}
 			
+		    //Display the popup over the marker
+		    arg0.showInfoWindow();
+		    
+		    //Change the snippet back to the html identifier. The info windows displayed are actually converted to flat images, so this shouldn't change the view.
+		    arg0.setSnippet(oldSnippet);			    
+		    
+			return true;
+		}
 		});
 		
 		// Create an ArrayAdapter using the string array and a default spinner layout
@@ -161,6 +143,7 @@ public class Map extends Activity{
 		map_route_spinner.setOnItemSelectedListener(new RouteItemSelectedListener());
 	}
 	
+	//Listener for the route spinner
 	public class RouteItemSelectedListener implements OnItemSelectedListener {
 			
 			//Callback function
@@ -187,7 +170,11 @@ public class Map extends Activity{
 		protected String doInBackground(Integer... route) {
 			url = url + route[0];
 	        try {	        	
-	            // defaultHttpClient
+	            /*
+	             * You 'query' lextran by visiting a certain URL tailed to the route you want to look at.
+	             * We append the routeID to the URL and then use android's built in http methods to connect
+	             * to the page and grab the XML info for the route.
+	        	*/
 	            DefaultHttpClient httpClient = new DefaultHttpClient();
 	            HttpPost httpPost = new HttpPost(url);
 	 
@@ -210,9 +197,7 @@ public class Map extends Activity{
 	    //Callback method
 	    @Override
 	    protected void onPostExecute(String xml) {
-	        // If you have created a Dialog, here is the place to dismiss it.
 	        // The `xml` that you returned will be passed to this method.	
-	    	
 	    	//To Get Route Stop Coords
 	    	String lng;
 	    	String lat;
@@ -222,9 +207,11 @@ public class Map extends Activity{
 	    	//Clear the current stops vector
 	    	stopsList.clear();
 	    	
-	    	Document doc = getDomElement(xml);
+	    	//Java helper objects for parsing
+	    	Document doc = MainActivity.getDomElement(xml);
 	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);
 	    	
+	    	//Iterate over each node and store the data for the stop
 	    	for (int i = 0; i < nl.getLength(); i++) {
 	            Element e = (Element) nl.item(i);
 	            lng = e.getAttribute(KEY_LNG);
@@ -253,12 +240,12 @@ public class Map extends Activity{
 	    		 for (Stop stop : inStops) {
 	    			 currentStop = stop;
 	    			 
-	    			 //Create marker
+	    			 //Create marker for stop
 	    			 map.addMarker(new MarkerOptions()
 	    			 		.position(stop.getLatLng())
 	    			 		.title(stop.getName())
 	    			 		.snippet(stop.getHtmlTag())		//Make the snippet the html tag so we can get it later
-	    			 		.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
+	    			 		.icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))	//Set custom icon
 	    					 );
 	    		 }
 	    	 }   
@@ -275,7 +262,11 @@ public class Map extends Activity{
 			
 			url = url + stop[0];
 	        try {	        	
-	            // defaultHttpClient
+	            /*
+	             * You 'query' lextran by visiting a certain URL tailored to the data you want to look at.
+	             * We append the stop ID to the URL and then use android's built in http methods to connect
+	             * to the page and grab the HTML info for the stop.
+	        	*/
 	            DefaultHttpClient httpClient = new DefaultHttpClient();
 	            HttpPost httpPost = new HttpPost(url);
 	 
@@ -302,72 +293,7 @@ public class Map extends Activity{
 	    protected void onPostExecute(String inHtml) {}
 	}
 	
-	public Document getDomElement(String xml){
-		Document doc = null;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
- 
-            DocumentBuilder db = dbf.newDocumentBuilder();
- 
-            InputSource is = new InputSource();
-                is.setCharacterStream(new StringReader(xml));
-                doc = db.parse(is); 
- 
-            } catch (ParserConfigurationException e) {
-                Log.e("Error: ", e.getMessage());
-                return null;
-            } catch (SAXException e) {
-                Log.e("Error: ", e.getMessage());
-                return null;
-            } catch (IOException e) {
-                Log.e("Error: ", e.getMessage());
-                return null;
-            }
-                // return DOM
-            return doc;
-	}
-	
-	public static NavigationDataSet GetNavigationDataSet(String url) {
-		int LOG_LEVEL = 3;
-		String TAG = "NavigationDataSet";
-        NavigationDataSet navigationDataSet = null;
-        try
-            { 
-        	if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "url[" + url + "]");
-            final URL aUrl = new URL(url); 
-            if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Connecting...");
-            final URLConnection conn = aUrl.openConnection();
-            //conn.setReadTimeout(15 * 1000);  // timeout for reading the google maps data: 15 secs
-            conn.connect();
-            
-            if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Connected...");
-            /* Get a SAXParser from the SAXPArserFactory. */
-            SAXParserFactory spf = SAXParserFactory.newInstance(); 
-            SAXParser sp = spf.newSAXParser(); 
- 
-            /* Get the XMLReader of the SAXParser we created. */
-            XMLReader xr = sp.getXMLReader();
- 
-            /* Create a new ContentHandler and apply it to the XML-Reader*/ 
-            NavigationSaxHandler navSax2Handler = new NavigationSaxHandler(); 
-            xr.setContentHandler(navSax2Handler); 
-            
-            if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Parse Stream");
-            /* Parse the xml-data from our URL. */ 
-            xr.parse(new InputSource(aUrl.openStream()));
-            
-            if(LOG_LEVEL <= Log.DEBUG)Log.d(TAG, "Get data frm Parser");
-            /* Our NavigationSaxHandler now provides the parsed data to us. */ 
-            navigationDataSet = navSax2Handler.getParsedData(); 
- 
-        } catch (Exception e) {
-        	if(LOG_LEVEL <= Log.ERROR)Log.e(TAG, "error getting route info", e);
-            navigationDataSet = null;
-        }   
- 
-        return navigationDataSet;
-    }
-	
+	//Data structure used to represent a stop
 	private class Stop {
 		private LatLng latlng;
 		private String htmlTag;
@@ -392,6 +318,7 @@ public class Map extends Activity{
 		}
 	}
 	
+	//Take in the html info for a stop and parse out the routes and times that busses will be arriving
     private String parseDepartTimes(String inHtml) {    	
     	StringBuilder toReturn = new StringBuilder("");					//Initialize the return string
     	toReturn.append("     Estimated Times of Departure     \n");

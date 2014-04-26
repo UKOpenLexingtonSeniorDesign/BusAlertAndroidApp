@@ -189,7 +189,7 @@ public class Alert2 extends Activity {
 	}
 	
 	//Task that queries LexTran for the stops of a particular route, parses the information, then saves it.
-	private class XMLTask extends AsyncTask<Integer, String, String> {
+	protected class XMLTask extends AsyncTask<Integer, String, String> {
         String xml = null;
         String url = "http://realtime.lextran.com/InfoPoint/map/GetRouteXml.ashx?RouteID=";
 		
@@ -204,7 +204,7 @@ public class Alert2 extends Activity {
 			url = url + route[0];
 	        try {	        	
 	            /*
-	             * You 'query' lextran by visiting a certain URL tailed to the route you want to look at.
+	             * You 'query' lextran by visiting a certain URL tailored to the route you want to look at.
 	             * We append the routeID to the URL and then use android's built in http methods to connect
 	             * to the page and grab the XML info for the route.
 	        	*/
@@ -232,7 +232,7 @@ public class Alert2 extends Activity {
 	    protected void onPostExecute(String xml) {
 	    	//Initialize the list we will use to store the stops for the route
 		    stops = new ArrayList<HashMap<String, String>>();
-	    	Document doc = getDomElement(xml);		//Tool for parsing xml
+	    	Document doc = MainActivity.getDomElement(xml);		//Tool for parsing xml
 	    	
 	    	//get each stop
 	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);    	
@@ -256,49 +256,26 @@ public class Alert2 extends Activity {
 	    }
 	}
 	
-	//Java pre-built helper tool that is used to parse XML
-	public Document getDomElement(String xml){
-		Document doc = null;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-            DocumentBuilder db = dbf.newDocumentBuilder();
- 
-            //Set the input to our xml string
-            InputSource is = new InputSource();
-                is.setCharacterStream(new StringReader(xml));
-                doc = db.parse(is); 
- 
-            } catch (ParserConfigurationException e) {
-                Log.e("Error: ", e.getMessage());
-                return null;
-            } catch (SAXException e) {
-                Log.e("Error: ", e.getMessage());
-                return null;
-            } catch (IOException e) {
-                Log.e("Error: ", e.getMessage());
-                return null;
-            }
-            
-        	//return DOM
-            return doc;
-	}
-	
 	//getting the html tag
 	private class HTMLTask extends AsyncTask<Integer, String, String> {
-        private String xml = null;
+        private String html = null;
         private String url = "http://realtime.lextran.com/InfoPoint/map/GetRouteXml.ashx?RouteID=";
         
 		@Override
 		protected String doInBackground(Integer... route) {
 			url = url + route[0];
 	        try {	        	
-	            // defaultHttpClient
-	            DefaultHttpClient httpClient = new DefaultHttpClient();
+	            /*
+	             * You 'query' lextran by visiting a certain URL tailored to the route you want to look at.
+	             * We append the routeID to the URL and then use android's built in http methods to connect
+	             * to the page and grab the HTML info for the route.
+	        	*/	            
+	        	DefaultHttpClient httpClient = new DefaultHttpClient();
 	            HttpPost httpPost = new HttpPost(url);
 	 
 	            HttpResponse httpResponse = httpClient.execute(httpPost);
 	            HttpEntity httpEntity = httpResponse.getEntity();
-	            xml = EntityUtils.toString(httpEntity);
+	            html = EntityUtils.toString(httpEntity);
 	 
 	        } catch (UnsupportedEncodingException e) {
 	            e.printStackTrace();
@@ -308,15 +285,15 @@ public class Alert2 extends Activity {
 	            e.printStackTrace();
 	        }
 		
-	        //return xml
-	        return xml;
+	        //return html
+	        return html;
 		}
         
 	    //Callback method
 	    @Override
-	    protected void onPostExecute(String xml) {
-	        // The `xml` that you returned will be passed to this method.	   	
-	    	Document doc = getDomElement(xml);
+	    protected void onPostExecute(String html) {
+	        // The html that you returned will be passed to this method.	   	
+	    	Document doc = MainActivity.getDomElement(html);
 	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);
 	    	
 	    	for (int i = 0; i < nl.getLength(); i++) {
