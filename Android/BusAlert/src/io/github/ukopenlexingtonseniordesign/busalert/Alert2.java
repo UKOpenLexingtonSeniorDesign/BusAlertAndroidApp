@@ -1,13 +1,7 @@
 package io.github.ukopenlexingtonseniordesign.busalert;
 
 import android.app.Activity;
-//import io.github.ukopenlexingtonseniordesign.busalert.Alert.Hour1SelectedListener;
-//import io.github.ukopenlexingtonseniordesign.busalert.Alert.Minute1SelectedListener;
-//import io.github.ukopenlexingtonseniordesign.busalert.Alert.XMLTask;
-
 import android.app.AlertDialog;
-import io.github.ukopenlexingtonseniordesign.busalert.Alert.MyItemSelectedListener;
-//import io.github.ukopenlexingtonseniordesign.busalert.Map.Stop;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -47,20 +41,18 @@ import android.widget.ArrayAdapter;
 import android.widget.TimePicker;
 import android.widget.Spinner;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemSelectedListener;
- 
-//import com.blundell.tut.R;
-//import com.blundell.tut.service.ScheduleClient;
- 
-public class Alert2 extends Activity{
-	// This is a handle so that we can call methods on our service
-    private ScheduleClient scheduleClient;
-    // This is the date picker used to select the date for our notification
-    private TimePicker picker;
+import android.widget.AdapterView.OnItemSelectedListener; 
+
+//Page that is responsible for setting and creating the notification.
+public class Alert2 extends Activity {
+    private ScheduleClient scheduleClient;		// This is a handle so that we can call methods on our service
+    private TimePicker picker;					// This is the date picker used to select the date for our notification
     private String stopSelected;
     String routeSelected;
     String stopID;
 	ArrayList<HashMap<String, String>> stops;
+	
+	//Values used to parse the xml with
 	static final String KEY_ROUTE = "route";
 	static final String KEY_STOPS = "stops";
 	static final String KEY_STOP = "stop";
@@ -69,7 +61,9 @@ public class Alert2 extends Activity{
 	static final String KEY_LABEL = "label";
 	static final String KEY_LAT = "lat";
 	static final String KEY_HTML = "html";
-	HashMap<String, Integer> routeID = new HashMap<String, Integer>();
+	
+	//HashMap of Routes
+	private HashMap<String, Integer> routeID = new HashMap<String, Integer>();
  
     /** Called when the activity is first created. */
     @Override
@@ -83,50 +77,26 @@ public class Alert2 extends Activity{
  
         // Get a reference to our date picker
         picker = (TimePicker) findViewById(R.id.scheduleTimePicker);
-       
-        
-      //Fill the route id hashmap
-      		routeID.put("Woodhill", 1);
-      		routeID.put("Georgetown Road", 2);
-      		routeID.put("Tates Creek Road", 3);
-      		routeID.put("Newtown Pike", 4);
-      		routeID.put("Nicholasville Road", 5);
-      		routeID.put("North Broadway", 6);
-      		routeID.put("North Limestone", 7);
-      		routeID.put("Versailles Road", 8);
-      		routeID.put("Eastland", 9);
-      		routeID.put("Hamburg Pavillion", 10);
-      		routeID.put("Richmond Road", 11);
-      		routeID.put("Leestown Road", 12);
-      		routeID.put("South Broadway", 13);
-      		routeID.put("UK Commonwealth Stadium", 14);
-      		routeID.put("Red Mile", 15);
-      		routeID.put("BCTC Southland", 16);
-      		routeID.put("Northside Connector", 17);
-      		routeID.put("Centre Parkway Connector", 18);
-      		routeID.put("Masterson Station", 20);
-      		routeID.put("Keeneland Airport", 21);
-      		routeID.put("Nicholasville Express", 22);
-      		routeID.put("Trolley Blue Route", 24);
-      		routeID.put("Trolley Green Route", 25);
-      		routeID.put("Alexandria - UK Medical Center", 31);
       		
-      		//Create a List<String> to use to fill the route spinner
-      		List<String> route_list = new ArrayList<String>();
-      		for (String s : routeID.keySet()) {
-      			route_list.add(s);
-      		}
-      		//Fill route spinner
-      		Spinner route_spinner = (Spinner) findViewById(R.id.route_spinner);
-            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.simple_spinner_item, route_list);
-            dataAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
-            route_spinner.setAdapter(dataAdapter);
-    		route_spinner.setOnItemSelectedListener(new MyItemSelectedListener());
+  		//Get the RouteList
+  		RouteMap rm = new RouteMap();
+  		HashMap<String, Integer> routeID = rm.getRoutes();
+  		
+  		//Create a List<String> to use to fill the route spinner
+  		List<String> route_list = new ArrayList<String>();
+  		for (String s : routeID.keySet()) {
+  			route_list.add(s);
+  		}
+  		
+  		//Fill route spinner using built in android functions that populate the spinner from a list
+  		Spinner route_spinner = (Spinner) findViewById(R.id.route_spinner);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.simple_spinner_item, route_list);
+        dataAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        route_spinner.setAdapter(dataAdapter);
+		route_spinner.setOnItemSelectedListener(new MyItemSelectedListener());
     }
-     
-    /**
-     * This is the onClick called from the XML to set a new notification 
-     */
+    
+    //This is the onClick called from the XML to set a new notification 
     public void onDateSelectedButtonClick(View v){
         //send dialog to user saying notification has been set
     	AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
@@ -134,21 +104,22 @@ public class Alert2 extends Activity{
     	alertDialog.setMessage("Notification Set!");
     	alertDialog.show();
  
+        //Use android's built in calendar object and our picker to get the time for our notification
         Calendar c = Calendar.getInstance();
-        //c.set(year, month, day);
         c.set(Calendar.HOUR_OF_DAY, picker.getCurrentHour());
         c.set(Calendar.MINUTE, picker.getCurrentMinute());
-        //c.set(Calendar.SECOND, 0);
-        // Ask our service to set an alarm for that time, this activity talks to the client that talks to the service
         
-        //start new XML task to find the uniue stop ID of the selected stop
-        XMLTask2 task = new XMLTask2();
-		int routeInt = routeID.get(routeSelected);		//Get the integer of the route from the hashMap
+        //start new HTML task to find the unique stop ID of the selected stop
+        HTMLTask task = new HTMLTask();     
+        
+        //Get the integer of the route from the hashMap
+        RouteMap routemap = new RouteMap();
+        HashMap<String, Integer> routes = routemap.getRoutes();
+		int routeInt = routes.get(routeSelected);		
 	    task.execute(new Integer[] { routeInt });
-        //NotifyService.stopSelected = stopID; // needs to be the unique stop ID
+	    
+	    //Ask our service to set an alarm for that time, this activity talks to the client that talks to the service
         scheduleClient.setAlarmForNotification(c);
-        // Notify the user what they just did
-        //Toast.makeText(this, "Notification set for: "+ day +"/"+ (month+1) +"/"+ year, Toast.LENGTH_SHORT).show();
     }
      
     @Override
@@ -158,10 +129,6 @@ public class Alert2 extends Activity{
         if(scheduleClient != null)
             scheduleClient.doUnbindService();
         super.onStop();
-    }
-	
-    public void setStops(ArrayList<HashMap<String, String>> inStops) {
-    	stops = inStops;
     }
     
     public void fillBusStopSpinner(ArrayList<HashMap<String, String>> inStops)
@@ -175,15 +142,19 @@ public class Alert2 extends Activity{
     		}
     	}
 
+    	//Now fill the spinner with the list
         Spinner stop_spinner = (Spinner) findViewById(R.id.stop_spinner);
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.simple_spinner_item, list);
         dataAdapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
         stop_spinner.setAdapter(dataAdapter);
+        
+        //Create a listener for the object
         stop_spinner.setOnItemSelectedListener(new MyStopSelectedListener());
     }
 	
-public class MyStopSelectedListener implements OnItemSelectedListener {
-	String selected;	
+    //Object listener
+    public class MyStopSelectedListener implements OnItemSelectedListener {
+    	String selected;	
 	
 		//Callback function
 	    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -195,15 +166,20 @@ public class MyStopSelectedListener implements OnItemSelectedListener {
 	    }
 	}
     
+    //Object listener
 	public class MyItemSelectedListener implements OnItemSelectedListener {
 		
 		//Callback function
 	    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 	        routeSelected = parent.getItemAtPosition(pos).toString();
 	        
+	        //Create map of routes to get id
+	        RouteMap routemap = new RouteMap();
+	        HashMap<String, Integer> routes = routemap.getRoutes();
+	        
 	        //Now call the XML getter
 			XMLTask task = new XMLTask();
-			int routeInt = routeID.get(routeSelected);		//Get the integer of the route from the hashMap
+			int routeInt = routes.get(routeSelected);		//Get the integer of the route from the hashMap
 		    task.execute(new Integer[] { routeInt });		//Get stops for selected route
 	    }
 
@@ -212,10 +188,7 @@ public class MyStopSelectedListener implements OnItemSelectedListener {
 	    }
 	}
 	
-	
-	
-	
-	
+	//Task that queries LexTran for the stops of a particular route, parses the information, then saves it.
 	private class XMLTask extends AsyncTask<Integer, String, String> {
         String xml = null;
         String url = "http://realtime.lextran.com/InfoPoint/map/GetRouteXml.ashx?RouteID=";
@@ -226,43 +199,15 @@ public class MyStopSelectedListener implements OnItemSelectedListener {
 	        // For example showing a Dialog to give some feedback to the user.
 	    }
 
-	    @Override
-	    protected void onPostExecute(String xml) {
-	        // If you have created a Dialog, here is the place to dismiss it.
-	        // The `xml` that you returned will be passed to this method
-	    	
-		    stops = new ArrayList<HashMap<String, String>>();
-	    	Document doc = getDomElement(xml);
-	    	//get each stop
-	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);    	
-	    	for (int i = 0; i < nl.getLength(); i++) {
-	            // creating new HashMap
-	            HashMap<String, String> map = new HashMap<String, String>();
-	            Element e = (Element) nl.item(i);
-	            
-	            //CHANGES NEEDED HERE?
-	            map.put(KEY_LNG, e.getAttribute(KEY_LNG));
-	            map.put(KEY_LABEL, e.getAttribute(KEY_LABEL));
-	            map.put(KEY_LAT, e.getAttribute(KEY_LAT));
-	            map.put(KEY_HTML, e.getAttribute(KEY_HTML));
-	            
-	            // adding HashList to ArrayList
-	            stops.add(map);
-	        }	    	
-	    	
-	    	//Now set the bus stop spinner
-	    	fillBusStopSpinner(stops);
-	    	
-	    	//Save the values in the main thread after all processing is finished
-	    	setStops(stops);
-	    }
-
 		@Override
-		protected String doInBackground(Integer... stops) {
-			
-			url = url + stops[0];
+		protected String doInBackground(Integer... route) {
+			url = url + route[0];
 	        try {	        	
-	            // defaultHttpClient
+	            /*
+	             * You 'query' lextran by visiting a certain URL tailed to the route you want to look at.
+	             * We append the routeID to the URL and then use android's built in http methods to connect
+	             * to the page and grab the XML info for the route.
+	        	*/
 	            DefaultHttpClient httpClient = new DefaultHttpClient();
 	            HttpPost httpPost = new HttpPost(url);
 	 
@@ -278,18 +223,47 @@ public class MyStopSelectedListener implements OnItemSelectedListener {
 	            e.printStackTrace();
 	        }
 		
-	        //return xml
+	        //return the information for the route to the onPostExecute method
 	        return xml;
 		}
+	    
+		// The `xml` that you returned will be passed to this method
+	    @Override
+	    protected void onPostExecute(String xml) {
+	    	//Initialize the list we will use to store the stops for the route
+		    stops = new ArrayList<HashMap<String, String>>();
+	    	Document doc = getDomElement(xml);		//Tool for parsing xml
+	    	
+	    	//get each stop
+	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);    	
+	    	for (int i = 0; i < nl.getLength(); i++) {
+	    		//Holds the data for this stop, maps the longitude to lng, latitude to lat, etc. all formatted as strings.
+	            HashMap<String, String> map = new HashMap<String, String>();	
+	            Element e = (Element) nl.item(i);
+	            
+	            //Fill out the HashMap that holds the data for this stop
+	            map.put(KEY_LNG, e.getAttribute(KEY_LNG));
+	            map.put(KEY_LABEL, e.getAttribute(KEY_LABEL));
+	            map.put(KEY_LAT, e.getAttribute(KEY_LAT));
+	            map.put(KEY_HTML, e.getAttribute(KEY_HTML));
+	            
+	            // adding HashMap to list of stops
+	            stops.add(map);
+	        }	    	
+	    	
+	    	//Now set the bus stop spinner
+	    	fillBusStopSpinner(stops);
+	    }
 	}
 	
+	//Java pre-built helper tool that is used to parse XML
 	public Document getDomElement(String xml){
 		Document doc = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
- 
             DocumentBuilder db = dbf.newDocumentBuilder();
  
+            //Set the input to our xml string
             InputSource is = new InputSource();
                 is.setCharacterStream(new StringReader(xml));
                 doc = db.parse(is); 
@@ -304,12 +278,13 @@ public class MyStopSelectedListener implements OnItemSelectedListener {
                 Log.e("Error: ", e.getMessage());
                 return null;
             }
-                // return DOM
+            
+        	//return DOM
             return doc;
 	}
 	
 	//getting the html tag
-	private class XMLTask2 extends AsyncTask<Integer, String, String> {
+	private class HTMLTask extends AsyncTask<Integer, String, String> {
         private String xml = null;
         private String url = "http://realtime.lextran.com/InfoPoint/map/GetRouteXml.ashx?RouteID=";
         
@@ -340,24 +315,19 @@ public class MyStopSelectedListener implements OnItemSelectedListener {
 	    //Callback method
 	    @Override
 	    protected void onPostExecute(String xml) {
-	        // If you have created a Dialog, here is the place to dismiss it.
-	        // The `xml` that you returned will be passed to this method.	
-	    	
-	    	
+	        // The `xml` that you returned will be passed to this method.	   	
 	    	Document doc = getDomElement(xml);
 	    	NodeList nl = doc.getElementsByTagName(KEY_STOP);
 	    	
 	    	for (int i = 0; i < nl.getLength(); i++) {
 	            Element e = (Element) nl.item(i);
 
+	            //If we have found the stop that is currently selected, save its HTML tag
 	            if(e.getAttribute(KEY_LABEL).equals(stopSelected)){
 	            	//this is the right stop, save the hmtl tag
 	            	NotifyService.stopSelected = e.getAttribute(KEY_HTML);
-	            }
-	            
+	            }     
 	        }
 	    }
-	
-	}
-	
+	}	
 }
